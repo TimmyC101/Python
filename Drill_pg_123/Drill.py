@@ -66,6 +66,8 @@ def fileTransfer(self):
         if files.endswith(".txt"):
             self.filePath = os.path.join(self.source,files)
             shutil.move(self.filePath,self.target)
+            print(self.filePath)
+            print(str(time.ctime(os.path.getmtime(self.filePath))))
     updateDB(self)
 #updates database with relevant data
 def updateDB(self):
