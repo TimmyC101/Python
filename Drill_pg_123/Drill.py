@@ -57,7 +57,7 @@ def fileSource(self):
 def fileDestination(self):
     self.txt_destination.set(filedialog.askdirectory(title='Select a Destination Folder'))
     
-#iterates thru source file, locates .txt files, and copies them to destination file.  Then, calls on updateDB
+#iterates thru source file, locates .txt files, and moves them to destination file.  Then, calls on updateDB
 def fileTransfer(self):
     self.source = self.txt_source.get()
     self.target = self.txt_destination.get()
@@ -66,8 +66,6 @@ def fileTransfer(self):
         if files.endswith(".txt"):
             self.filePath = os.path.join(self.source,files)
             shutil.move(self.filePath,self.target)
-            print(self.filePath)
-            print(str(time.ctime(os.path.getmtime(self.filePath))))
     updateDB(self)
 #updates database with relevant data
 def updateDB(self):
@@ -80,15 +78,16 @@ def updateDB(self):
             col_fileName TEXT, \
             col_getmtime TEXT)")
         #look at files in destination directory.  For each, insert into table the file name (files) and getmtime
+        #redefine fileList since the files were relocated
+        self.fileList = os.listdir(self.target)
         for files in self.fileList:
-            if files.endswith(".txt"):
-                self.filePath = os.path.join(self.source,files)
-                cur.execute("INSERT INTO tbl_fileMove(col_fileName,col_getmtime) VALUES (?,?)", \
-                (files,str(time.ctime(os.path.getmtime(self.filePath))),))
+            self.filePath = os.path.join(self.target,files)
+            cur.execute("INSERT INTO tbl_fileMove(col_fileName,col_getmtime) VALUES (?,?)", \
+            (files,str(time.ctime(os.path.getmtime(self.filePath))),))
+            print(self.filePath)
+            print(str(time.ctime(os.path.getmtime(self.filePath))))
         conn.commit()
     conn.close()
-
-    
     
 
 if __name__ == "__main__":
